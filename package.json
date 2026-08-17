@@ -1,0 +1,22 @@
+{
+  "name": "whatsapp-ai-bot",
+  "version": "1.0.0",
+  "description": "Production-ready WhatsApp AI Bot for Railway",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "openai": "^4.10.0",
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^6.7.20",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "pino": "^9.6.0",
+    "qrcode": "^1.5.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

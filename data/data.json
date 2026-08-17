@@ -1,0 +1,33 @@
+{
+  "business": {
+    "name": "Adyanant OR PRANAB GOSWAMI",
+    "description": "Technology, web development, and Discord bot automation services.",
+    "owner": "PRANAB GOSWAMI",
+    "category": "Technology"
+  },
+  "website": {
+    "name": "Adyanant (OWNER PRANAB GOSWAMI)",
+    "url": "adyaanantofficial-wq.github.io/ADYAANANT/",
+    "description": "Official website for Adyanant services and portfolio."
+  },
+  "services": [
+    "Web Development & Branding",
+    "Discord Bot Creation (Legendpro, LegendMeta)",
+    "Server Automation (Node.js & Python)",
+    "Cybersecurity & Network Administration"
+  ],
+  "products": [],
+  "contact": {
+    "email": "adyanant.official@gmail.com",
+    "phone": ["+919352334463", "+918609232849"],
+    "whatsapp": ["+919352334463", "+918609232849", "+918145161631"],
+    "address": "Malda, West Bengal, India"
+  },
+  "social": {},
+  "faq": [
+    {
+      "question": "What technologies do you use for bot development?",
+      "answer": "We primarily use Node.js and Python for building intelligent and automated Discord bots."
+    }
+  ]
+}
