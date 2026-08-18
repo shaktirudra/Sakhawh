@@ -1,6 +1,7 @@
 const { getKnowledgeContext } = require('./knowledge');
 const { generateAIResponse } = require('./ai');
 const { handleCommand, isCommand } = require('./commands');
+const { isOrderRequest, handleOrderRequest } = require('./orders');
 const logger = require('./logger');
 
 async function handleMessage(sock, msg) {
@@ -26,6 +27,15 @@ async function handleMessage(sock, msg) {
     if (isCommand(text)) {
       await handleCommand(sock, remoteJid, text);
       return;
+    }
+
+    // Check for order request
+    if (isOrderRequest(text)) {
+      const orderHandled = await handleOrderRequest(sock, remoteJid, text);
+      if (orderHandled) {
+        logger.info('Order request processed successfully');
+        // Continue to AI for additional handling
+      }
     }
 
     // Rate limiting / debounce placeholder (simple per-message guard)
