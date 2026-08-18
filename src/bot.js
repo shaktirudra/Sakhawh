@@ -13,6 +13,7 @@ const { handleMessage } = require('./messageHandler');
 const fs = require('fs');
 const path = require('path');
 const QRCode = require('qrcode');
+const qrcode = require('qrcode-terminal');
 
 let isStarting = false;
 let pairingRequested = false;
@@ -75,6 +76,9 @@ async function startBot() {
         console.log('PAIRING (QR) DATA (scan with WhatsApp):');
         console.log(qr);
         console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+        // Generate and display QR code in terminal
+        qrcode.generate(qr, { small: true });
 
         // Save raw QR string and generate PNG for scanning via camera
         try {
