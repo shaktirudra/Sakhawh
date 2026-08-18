@@ -21,7 +21,7 @@ async function handleMessage(sock, msg) {
     const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text;
     if (!text) return; // Gracefully ignore media/polls/locations for now
 
-    logger.info(`Received private message from ${remoteJid.split('@')[0]}: ${text.substring(0, 30)}...`);
+    logger.info(`Received private message from ${remoteJid.split('@')[0]}: ${text.substring(0, 50)}...`);
 
     // Check command router
     if (isCommand(text)) {
@@ -29,12 +29,19 @@ async function handleMessage(sock, msg) {
       return;
     }
 
-    // Check for order request
+    // Check for order request FIRST (highest priority)
     if (isOrderRequest(text)) {
-      const orderHandled = await handleOrderRequest(sock, remoteJid, text);
-      if (orderHandled) {
-        logger.info('Order request processed successfully');
-        // Continue to AI for additional handling
+      logger.info('🛍️ Order request detected - processing...');
+      try {
+        const orderHandled = await handleOrderRequest(sock, remoteJid, text);
+        if (orderHandled) {
+          logger.info('✅ Order confirmed and saved successfully');
+          // Continue to AI for additional handling if needed
+        } else {
+          logger.warn('⚠️ Order detection triggered but handling failed');
+        }
+      } catch (orderError) {
+        logger.error(`Order processing error: ${orderError?.message || orderError}`);
       }
     }
 
