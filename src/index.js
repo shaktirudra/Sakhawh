@@ -1,15 +1,33 @@
 const express = require('express');
+const path = require('path');
 const { startBot } = require('./bot');
 const config = require('./config');
 const logger = require('./logger');
 
 const app = express();
 
-// Health check endpoints for Railway
+// QR Code pairing page
 app.get('/', (req, res) => {
-  res.send(`${config.BOT_NAME} is running.`);
+  res.send(`
+    <h1>SAKHAAI WhatsApp Pairing</h1>
+    <p>Open WhatsApp → Settings → Linked Devices → Link a Device</p>
+    <img src="/qr.png" style="width:400px;height:400px;image-rendering:auto;">
+    <p>Scan the QR code above.</p>
+  `);
 });
 
+// Serve QR code image
+app.get('/qr.png', (req, res) => {
+  const qrPath = path.join(__dirname, '..', 'auth', 'qr.png');
+  res.sendFile(qrPath, (err) => {
+    if (err) {
+      logger.error(`Failed to send QR image: ${err.message}`);
+      res.status(404).send('QR code not found. Please wait for bot to generate it.');
+    }
+  });
+});
+
+// Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
