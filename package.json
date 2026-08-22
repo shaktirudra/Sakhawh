@@ -12,6 +12,7 @@
     "@whiskeysockets/baileys": "^6.7.20",
     "dotenv": "^16.4.5",
     "express": "^4.22.2",
+    "mongodb": "^6.21.0",
     "openai": "^4.10.0",
     "pino": "^9.6.0",
     "qrcode": "^1.5.1",

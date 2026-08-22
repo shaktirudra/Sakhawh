@@ -10,6 +10,9 @@ const config = require('./config');
 const logger = require('./logger');
 const { normalizePhoneNumber, sleep } = require('./utils');
 const { handleMessage } = require('./messageHandler');
+const { handleMessageUpdates, cacheMessage } = require('./deletionMonitor');
+const { initDatabase } = require('./database');
+const { startScheduler, setSchedulerConnection } = require('./scheduler');
 const fs = require('fs');
 const path = require('path');
 const QRCode = require('qrcode');
@@ -27,6 +30,7 @@ async function startBot() {
   isStarting = true;
 
   try {
+    await initDatabase();
     logger.info('Loading WhatsApp authentication state...');
     const { state, saveCreds } = await useMultiFileAuthState('auth');
 
@@ -40,6 +44,7 @@ async function startBot() {
       generateHighQualityLinkPreview: true,
       connectTimeoutMs: 30_000
     });
+    await startScheduler(sock);
 
     // If not registered, we will wait for connection.update events.
     // Baileys may emit a pairing code or a QR in connection.update. We'll handle both safely there.
@@ -126,6 +131,7 @@ async function startBot() {
         }
 
         const statusCode = lastDisconnect?.error?.output?.statusCode;
+        setSchedulerConnection(false, sock);
         const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
         logger.warn(`WhatsApp disconnected. Reason: ${reason}. Reconnect: ${shouldReconnect}`);
 
@@ -154,17 +160,30 @@ async function startBot() {
         logger.info('Connecting to WhatsApp...');
       } else if (connection === 'open') {
         logger.info('WhatsApp connected successfully.');
+        setSchedulerConnection(true, sock);
       }
     });
 
     sock.ev.on('messages.upsert', async (m) => {
-      if (m.type !== 'notify') return;
+      if (m.type !== 'notify' && !m.messages.some(msg => msg.key.fromMe)) return;
+      if (config.DEBUG_EVENTS) logger.debug(`messages.upsert received: ${m.messages.length} message(s)`);
 
       for (const msg of m.messages) {
         if (!msg.message) continue;
-        if (msg.key.fromMe) continue; // Prevent responding to self
         await handleMessage(sock, msg);
       }
+    });
+
+    sock.ev.on('messaging-history.set', async (history) => {
+      for (const msg of history.messages || []) {
+        if (msg.key.remoteJid?.endsWith('@g.us') || msg.key.remoteJid?.includes('@broadcast')) continue;
+        await cacheMessage(msg, msg.key.fromMe ? sock.user?.id : msg.key.senderPn || msg.key.participant || msg.key.remoteJid)
+          .catch(error => logger.warn(`History message cache failed: ${error?.message || error}`));
+      }
+    });
+
+    sock.ev.on('messages.update', async (updates) => {
+      await handleMessageUpdates(sock, updates).catch(error => logger.error(`Message update monitor error: ${error?.message || error}`));
     });
 
   } catch (error) {
